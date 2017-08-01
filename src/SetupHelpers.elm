@@ -36,7 +36,12 @@ else returns Nothing
 -}
 getCoordsIfValidPlacement : Ship -> Int -> Bool -> List Int -> Maybe (List Int)
 getCoordsIfValidPlacement ship idx rotate usedspots =
-    case generateCoords rotate idx ship.length of
+    let
+        mbcoords = case rotate of
+            True -> mbGenVerticalCoords idx ship.length
+            False -> mbGenHorizCoords idx ship.length
+    in
+    case mbcoords of
         Just coords ->
             -- coords are at least on the board. check if occupied...
             if List.any (\idx -> List.member idx usedspots) coords then
@@ -54,6 +59,8 @@ getCoordsIfValidPlacement ship idx rotate usedspots =
 
 {-
 attempt to save the ship placement at 'idx'
+if succesful, returns an updated model
+if the attempt fails, returns the previous model
 -}
 tryPlaceShip : ShipPlacementOp -> Model -> Model
 tryPlaceShip {idx,side,ship} model =
@@ -88,29 +95,6 @@ tryPlaceShip {idx,side,ship} model =
 
 
 {-
-use a coordinates generator to create a set of coordinates
-returns a set of coordinates or Nothing if the attempt fails
--}
-generateCoords : Bool -> Int -> Int -> Maybe (List Int)
-generateCoords isvertical idx length =
-    let
-        -- determine the coordinates generation helper to use
-        -- based on the isvertical flag
-        -- horizontal generators give [x, x+1, x+2..]
-        -- vertical generators give [x, x+10, x+20..]
-        coordsGenerator =
-            (getCoordsGenerator isvertical)
-    in
-        -- return a set of coordinates using the generator
-        -- if the attempt fails because:
-        --   the coordinates fall outside the board, or
-        --   the coords span multiple rows for horizontal placements
-        -- return Nothing
-        -- TODO: maybe utilize Elm Results for these sorts of sitches?
-        coordsGenerator idx length
-
-
-{-
 assign 'coords' to ship
 update the appropriate list of ships based on current player
 return an updated model
@@ -127,15 +111,18 @@ saveShipUpdateModel side ship coords model =
             {ship | coords = coords}
 
         newships =
-            replaceShipById newship oldships
+            replaceShipById oldships newship
 
         newmodel =
-            updatePlayerShips model side newships
+            case side of
+                PlayerSide1 -> { model | p1ships = newships }
+                PlayerSide2 -> { model | p2ships = newships }
     in
         -- update the most recently placed ship with the new coords
         -- this allows for responding to 'isvertical' toggles
         -- allowing us to know which ship was placed
-        {newmodel | placingShip = Just newship}
+        {newmodel |
+            placingShip = Just newship}
 
 
 {-
@@ -144,73 +131,23 @@ clear any current placement
 -}
 toggleRotateShip : Model -> Model
 toggleRotateShip model =
-    let
-        newmodel = clearCurrentPlacement model
-    in
-        {newmodel | rotateShip = not model.rotateShip}
-
-
-{-
-helper to update a player's list of ships
--}
-updatePlayerShips : Model -> PlayerSide -> List Ship -> Model
-updatePlayerShips model side ships =
-    case side of
-        PlayerSide1 -> { model | p1ships = ships }
-        PlayerSide2 -> { model | p2ships = ships }
-
-
-{-
-get rid of any coords for the current 'placingShip'
--}
-clearCurrentPlacement : Model -> Model
-clearCurrentPlacement model =
     case model.placingShip of
         Just ship ->
-            { model |
-                p1ships = List.map (\s2 -> clearShipCoords ship.id s2) model.p1ships
-                ,placingShip = Just { ship | coords = []}
-            }
+            let
+                newship = { ship | coords = [] }
+            in
+            {model |
+                p1ships = replaceShipById model.p1ships newship
+                ,placingShip = Just newship
+                ,rotateShip = not model.rotateShip}
 
         Nothing ->
-            model
-
-
-{-
-save the current ship/coordinates assignment and update the model
-appropriately depending on the current player
-this function assumes all checks have already been performed and
-the coordinates are valid and available
--}
-updateShip : Model -> List Ship -> Ship -> List Int -> Model
-updateShip model ships ship coords =
-    let
-        newship =
-            {ship | coords = coords}
-
-        newships =
-            replaceShipById newship ships
-
-        newmodel =
-            case model.playerTurn of
-                PlayerSide1 -> {model | p1ships = newships}
-                PlayerSide2 -> {model | p2ships = newships}
-    in
-        {newmodel | placingShip = Just newship}
+            {model | rotateShip = not model.rotateShip}
 
 
 {-
 coordinates helpers
 -}
-
-{-
-generate a set of vertical coordinates
--}
-generateVerticalCoords : Int -> Int -> List Int
-generateVerticalCoords start length =
-    List.range 0 (length - 1)
-    |> List.map (\i -> start + (i * 10))
-
 
 {-
 attempt to generate valid coordinates for vertically oriented placement
@@ -220,7 +157,9 @@ if any coords fall outside the game board, return Nothing
 mbGenVerticalCoords : Int -> Int -> Maybe (List Int)
 mbGenVerticalCoords idx length =
     let
-        coords = generateVerticalCoords idx length
+        coords =
+            List.range 0 (length - 1)
+            |> List.map (\i -> idx + (i * 10))
     in
         case List.all (\s -> s >= 0 && s < 100) coords of
             True -> Just coords
@@ -254,16 +193,5 @@ currentShipSet model =
     case model.playerTurn of
         PlayerSide1 -> model.p1ships
         PlayerSide2 -> model.p2ships
-
-
-{-
-returns an appropriate coordinates generator function based
-on the isvertical param
--}
-getCoordsGenerator : Bool -> (Int -> Int -> Maybe (List Int))
-getCoordsGenerator isvertical =
-    case isvertical of
-        True -> mbGenVerticalCoords
-        False -> mbGenHorizCoords
 
 

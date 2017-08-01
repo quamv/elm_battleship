@@ -140,13 +140,19 @@ update msg model =
         TakeSmahtahShawt rand ->
             -- take a random number and use it to randomize the selection
             -- of potential target indexes
-            case chooseTargetIdx rand model.p1ships model.p2shots of
+            let
+                -- hits on opponent ships that are still active
+                -- these are used as 'hot spots' fuh smaht tahgetin'
+                activehits =
+                    activeShipHits model.p1ships
+            in
+            case chooseTargetIdx rand activehits model.p2shots of
                 Nothing -> (fatalError model "chooseTargetIdx returned Nothing", Cmd.none)
                 Just spotIdx -> update (TakeShot spotIdx) model
 
         TakeShot idx ->
             -- take a shot at idx
-            (tryShotIfNotDuplicate model idx, Cmd.none)
+            (tryShot model idx, Cmd.none)
 
 
         {- misc messages -}

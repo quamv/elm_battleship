@@ -67,17 +67,17 @@ call tryPlaceShip to attempt to place the ship at the randomized idx
 cpuTryPlaceShipCore : Int -> Ship -> Model -> Model
 cpuTryPlaceShipCore rand ship model =
     let
-        -- 'randomly' set the rotate flag for this placement
-        -- TODO: determine right way to randomize another flag
         rotate =
+            -- 'randomly' set the rotate flag for this placement
+            -- TODO: determine right way to randomize another flag
             ((rem rand 37) > 19)
 
-        -- get the list of valid potential indexes for this ship
         valididxs =
+            -- get the list of valid potential indexes for this ship
             getValidIdxs fullSpotsList model.p2ships ship rotate
 
-        -- randomly select one of the valid indexes
         idx =
+            -- randomly select one of the valid indexes
             rem rand (List.length valididxs)
     in
         case getNth idx valididxs of
@@ -104,8 +104,13 @@ save the ship at that location
 -}
 cpuTryPlaceShip : Int -> Model -> Model
 cpuTryPlaceShip rand model =
-
-    case nextUnplacedShip model.p2ships of
+    let
+        nextship =
+            model.p2ships
+            |> List.filter (\ship -> List.length ship.coords == 0)
+            |> List.head
+    in
+    case nextship of
 
         Nothing ->
             model
@@ -134,30 +139,20 @@ CPU targeting/shooting helpers
 {-
 use random number for indexing into list of potential target indexes
 -}
-chooseTargetIdx : Int -> List Ship -> List Shot -> Maybe Int
-chooseTargetIdx rand ships shots =
+chooseTargetIdx : Int -> List Int -> List Shot -> Maybe Int
+chooseTargetIdx rand activeshiphits shots =
     let
-        viabletargets = getPreferableSpots ships shots
-        randIdx = rem rand (List.length viabletargets)
+        filterfuncs =
+            [findHitNeighbors, findStreaks]
+
+        viabletargets =
+            getOpenSpots shots
+            |> improveGuess activeshiphits filterfuncs
+
+        randIdx =
+            rem rand (List.length viabletargets)
     in
         getNth randIdx viabletargets
-
-
-{-
-determine some indexes to shoot at
-start with all open spaces and then use some filter functions
-to improve the set of targets (if possible) down to those
-which have higher probability based on their proximity to
-previous hit locations and especially to streaks of hits
--}
-getPreferableSpots : List Ship -> List Shot -> List Int
-getPreferableSpots ships shots =
-    let
-        activehits = activeShipHits ships
-        filterfuncs = [findHitNeighbors, findStreaks]
-    in
-        getOpenSpots shots
-        |> improveGuess activehits filterfuncs
 
 
 {-
