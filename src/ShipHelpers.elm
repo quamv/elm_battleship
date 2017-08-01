@@ -6,9 +6,9 @@ import Model exposing (..)
 -- see if there is overlap between coords and ship.coords
 -- (ie. the ship is located at one or more of the coords)
 coordsOccupiedByShip : List Int -> Ship -> Bool
-coordsOccupiedByShip coords ship =
+coordsOccupiedByShip coords2Test ship =
     ship.coords
-    |> List.any (\coord -> List.member coord coords)
+    |> List.any (\i -> List.member i coords2Test)
 
 
 -- see if any of the coordinates in coords are occupied by any ship
@@ -33,7 +33,8 @@ addHitToShip idx ship =
             }
 
 
--- record a hit on ship's hit list, update the list of ships
+-- record a hit on ship's hit list
+-- returns updated list of ships
 recordHit : Int -> Ship -> List Ship -> List Ship
 recordHit idx ship ships =
     addHitToShip idx ship
@@ -86,12 +87,12 @@ tryShotAtIdx idx model =
                  PlayerSide2 -> (model.p1ships, model.p2shots)
 
         (newships, shotresult) =
+            -- attempt a shot at location 'idx'
             let
                 liveopponentships =
                     -- only 'live' ships are eligible for hit testing
                     List.filter (\ship -> not ship.sank) originalships
             in
-            -- attempt a shot at location 'idx'
             case takeShot idx liveopponentships of
                 Nothing ->
                     -- no hit, record this as a miss
@@ -102,13 +103,13 @@ tryShotAtIdx idx model =
                     (recordHit idx ship originalships, Hit)
 
         newmodel =
+            -- update model w/new opponent's ships and current player's shots
+            -- if the shot was a miss, the ship list will remain unchanged
             let
                 newshots =
                     -- record this shot in the current player's shots history
                     originalshots ++ [Shot idx model.playerTurn shotresult]
             in
-            -- update model w/new opponent's ships and current player's shots
-            -- if the shot was a miss, the ship list will remain unchanged
             case model.playerTurn of
                 PlayerSide1 -> {model | p2ships = newships, p1shots = newshots}
                 PlayerSide2 -> {model | p1ships = newships, p2shots = newshots}

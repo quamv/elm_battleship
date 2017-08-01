@@ -27,7 +27,7 @@ view model =
             div
                 [] --[style [("margin","0 auto"),("width","500px")]]
                 [selectedView model]
-            ,diagsDiv model
+            --,diagsDiv model
         ]
 
 selectedView : Model -> Html Msg
@@ -51,11 +51,62 @@ gameplayView childView model =
         ,childView model
     ]
 
+numLiveShips : List Ship -> Int
+numLiveShips ships =
+    ships
+    |> List.filter (\s -> not s.sank)
+    |> List.length
+
+
+cellStyle = [
+    ("padding","0px 10px 0px 10px")
+    ,("border","1px solid black")
+    ]
+
+tableStyle = [
+    ("border","1px solid black")
+    ]
+
+shipsTable : PlayerSide -> List Ship -> Html Msg
+shipsTable side ships =
+    let
+        colnames = ["shiptype","coords"]
+    in
+    div [] [
+        div [] [text <| toString side ++ " Ships"]
+        ,table [style tableStyle] [
+            thead [] <| List.map (\s -> th [] [text s]) colnames
+            ,tbody [] <| List.map
+                (\ship -> tr [] [
+                    td [style cellStyle] [text <| toString ship.shiptype]
+                    ,td [style cellStyle] [text <| toString ship.coords]
+                ])
+                ships
+        ]
+    ]
+
+
 gameOverView : Model -> Html Msg
 gameOverView model =
-    div [] [
-        text "Game Over!"
-    ]
+    let
+        p1shipsleft =
+            numLiveShips model.p1ships
+
+        p2shipsleft =
+            numLiveShips model.p2ships
+
+        winner =
+            if p1shipsleft == 0 then
+                PlayerSide2
+            else -- if p2shipsleft == 0 then
+                PlayerSide1
+    in
+        div [] [
+            div [] [text "Game Over!" ]
+            ,div [] [text <| "Winner: " ++ toString winner]
+            ,shipsTable PlayerSide1 model.p1ships
+            ,shipsTable PlayerSide2 model.p2ships
+        ]
 
 
 getSbsStyle : PlayerSide -> PlayerSide -> List (String, String)
@@ -63,6 +114,7 @@ getSbsStyle activeside side =
     case activeside == side of
         True -> styles.sidebysideViewStyle ++ styles.activeView
         False -> styles.sidebysideViewStyle ++ styles.inactiveView
+
 
 sidebysideView : Model -> Html Msg
 sidebysideView model =
