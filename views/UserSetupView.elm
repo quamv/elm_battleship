@@ -38,7 +38,11 @@ cellGen idx model  =
             attribute "ondragover" "return false"
             ]
             ++ case model.placingShip of
-                Just ship ->[onDragEnter2 idx model ship]
+                Just ship ->
+                    let
+                        op = ShipPlacementOp ship PlayerSide1 idx
+                    in
+                    [onDragEnter2 idx model ship,onClickCell (PlaceShipAtIdx op)]
                 Nothing -> []
     in
         td

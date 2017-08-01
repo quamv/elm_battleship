@@ -209,5 +209,4 @@ nextGameState model =
 allShipsPlaced : List Ship -> Bool
 allShipsPlaced ships =
     ships
-    |> List.all (\ship -> List.length ship.coords == ship.length)
-
+    |> List.all (\ship -> List.length ship.coords /= 0)

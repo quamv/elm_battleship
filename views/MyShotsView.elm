@@ -31,12 +31,14 @@ cellGen idx model  =
     in
     case cellstate of
         Just shotresult ->
+            -- there was a previous shot on this cell. format based on result
             case shotresult of
                 Hit -> td [style <| styles.tdstyle ++ styles.hitStyle] [text "hit"]
                 Miss -> td [style <| styles.tdstyle ++ styles.missStyle] [text "miss"]
 
         Nothing ->
             let
+                -- if it's our turn, allow clicking on this cell
                 attrs = case model.playerTurn of
                     PlayerSide1 -> [onClickShip (TakeShot idx)]
                     _ -> []

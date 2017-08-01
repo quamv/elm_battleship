@@ -42,7 +42,7 @@ subscriptions model =
         GameOver -> Sub.none
         UserSetup -> Sub.none
         CPUSetup ->
-            Sub.batch [Time.every (200 * millisecond) AutoTriggerCpuPlaceShip]
+            Sub.batch [Time.every (1000 * millisecond) AutoTriggerCpuPlaceShip]
         Playing ->
             case model.cpuDemo of
                 True ->
@@ -58,7 +58,7 @@ init : (Model, Cmd Msg)
 init =
     (
         {
-            p1ships = defaultShipList3
+            p1ships = defaultShipList
             ,p2ships = defaultShipList --defaultShipList3
             ,p1shots = []
             ,p2shots = []

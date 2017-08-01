@@ -100,8 +100,13 @@ gameOverView model =
                 PlayerSide2
             else -- if p2shipsleft == 0 then
                 PlayerSide1
+
+        divstyle = [
+            ("margin","0 auto")
+            ,("width","600px")
+            ]
     in
-        div [] [
+        div [style divstyle] [
             div [] [text "Game Over!" ]
             ,div [] [text <| "Winner: " ++ toString winner]
             ,shipsTable PlayerSide1 model.p1ships
@@ -123,13 +128,14 @@ sidebysideView model =
             li
                 [style <| getSbsStyle model.playerTurn PlayerSide1]
                 --[style <| styles.sidebysideViewStyle ++ styles.activeView]
-                [myshotsView model]
+                [myshotsdiv model]
             ,li
                 [style <| getSbsStyle model.playerTurn PlayerSide2]
                 --[style <| styles.sidebysideViewStyle ++ styles.activeView]
-                [myshipsView model]
+                --[myshipsView model]
+                [myshipsdiv model]
         ]
-        ,manualOpponentView model
+        --,manualOpponentView model
     ]
     --            let
     --                subview = stackedView
@@ -149,6 +155,25 @@ sidebysideView model =
     --                    --gameplayView myshotsview model
     --
     --                PlayerSide2 -> gameplayView myshipsView model
+
+
+myshotsdiv : Model -> Html Msg
+myshotsdiv model =
+    div
+        []
+        [
+            h2 [] [text "My Shots/Cpu Ships"]
+            ,myshotsView model
+        ]
+
+myshipsdiv : Model -> Html Msg
+myshipsdiv model =
+    div
+        []
+        [
+            h2 [] [text "My Ships/Cpu Shots"]
+            ,myshipsView model
+        ]
 
 
 viewSelector : Model -> Html Msg
