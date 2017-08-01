@@ -74,7 +74,7 @@ cpuTryPlaceShipCore rand ship model =
 
         -- get the list of valid potential indexes for this ship
         valididxs =
-            getValidIdxs fullSpotsList model.p2ships ship model.rotateShip
+            getValidIdxs fullSpotsList model.p2ships ship rotate
 
         -- randomly select one of the valid indexes
         idx =
