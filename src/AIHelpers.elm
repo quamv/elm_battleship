@@ -91,7 +91,8 @@ cpuTryPlaceShipCore rand ship model =
     in
     case getNth idx valididxs of
         Nothing ->
-            Debug.crash "cpuPlaceShip2 getNth returned Nothing"
+            model
+            --Debug.crash "cpuPlaceShip2 getNth returned Nothing"
 
         Just aValue ->
             let

@@ -7,6 +7,7 @@ import Json.Decode as Decode
 import Model exposing (..)
 import ViewCommon exposing (..)
 import ViewStyles exposing (..)
+import Helpers
 
 
 userSetupView : Model -> Html Msg
@@ -51,7 +52,7 @@ cellGen idx model =
     in
     td
         ([ style cellStyle ] ++ tdattrs)
-        [ text <| toString idx ]
+        [ text <| String.fromInt idx ]
 
 
 btnsView : Model -> Html Msg
@@ -121,7 +122,7 @@ availableShipsView model =
                          ]
                             ++ possibleCurrentlyPlacing model n
                         )
-                        [ div [] [ text <| toString n.shiptype ]
+                        [ div [] [ text <| Helpers.shipTypeToString n.shiptype ]
 
                         --.[button [onClick (SelectShipForPlacement n)] [text <| toString n.shiptype]]
                         ]

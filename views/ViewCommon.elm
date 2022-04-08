@@ -88,13 +88,13 @@ radio value msg =
 -}
 
 
-(=>) =
-    \a b -> ( a, b )
+-- (=>) =
+--     \a b -> ( a, b )
 
 
 px : Int -> String
 px number =
-    toString number ++ "px"
+    String.fromInt number ++ "px"
 
 
 getPosition : Model -> Position

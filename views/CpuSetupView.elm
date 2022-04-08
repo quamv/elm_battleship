@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Json.Decode as Decode
 import Model exposing (..)
+import Helpers
 -- import Mouse exposing (Position)
 
 
@@ -25,7 +26,7 @@ cpuSetupView model =
                 |> List.filter (\ship -> List.length ship.coords == 0)
                 |> List.length
     in
-    div [ style viewstyles ]
+    div ( Helpers.listOfStringTuplesToStyle viewstyles )
         [ div [] [ text <| "setting up cpu board" ]
-        , div [] [ text <| "ships left: " ++ toString numleft ]
+        , div [] [ text <| "ships left: " ++ String.fromInt numleft ]
         ]
