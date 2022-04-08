@@ -1,7 +1,6 @@
 {
     "type": "application",
     "source-directories": [
-        ".",
         "src",
         "views"
     ],
@@ -13,8 +12,7 @@
             "elm/html": "1.0.0",
             "elm/json": "1.1.3",
             "elm/random": "1.0.0",
-            "elm/time": "1.0.0",
-            "mbr/elm-mouse-events": "1.0.4"
+            "elm/time": "1.0.0"
         },
         "indirect": {
             "elm/url": "1.0.0",

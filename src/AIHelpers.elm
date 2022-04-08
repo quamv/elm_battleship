@@ -5,8 +5,8 @@ module AIHelpers exposing (..)
 
 import Helpers exposing (..)
 import Model exposing (..)
-import Mouse exposing (Position)
-import MouseEvents exposing (..)
+-- import Mouse exposing (Position)
+-- import MouseEvents exposing (..)
 import SetupHelpers exposing (..)
 import ShipHelpers exposing (..)
 

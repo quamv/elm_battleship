@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Decode
 import Model exposing (..)
-import Mouse exposing (Position)
+-- import Mouse exposing (Position)
 
 
 isOccupied : Int -> List Ship -> Bool
