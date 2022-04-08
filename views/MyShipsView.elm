@@ -1,65 +1,71 @@
-module MyShipsView exposing (myshipsView, manualOpponentView)
+module MyShipsView exposing (manualOpponentView, myshipsView)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Model exposing (..)
 import Json.Decode as Decode
-import ViewStyles exposing (..)
+import Model exposing (..)
 import ViewCommon exposing (..)
+import ViewStyles exposing (..)
 
 
 myshipsView : Model -> Html Msg
 myshipsView model =
     div
-        [style styles.containerStyle]
-        [
-            tableGen cellGen model styles.myshipsTableStyle
-            --,manualOpponentView model
+        [ style styles.containerStyle ]
+        [ tableGen cellGen model styles.myshipsTableStyle
+
+        --,manualOpponentView model
         ]
 
 
 manualOpponentView model =
     if model.gameState == GameOver then
         div [] []
+
     else
         div []
-        [
-            button
-                [onClick ToggleCpuDemo]
-                [text "toggle cpu demo"]
-            ,case model.cpuDemo of
-                True -> span [] []
+            [ button
+                [ onClick ToggleCpuDemo ]
+                [ text "toggle cpu demo" ]
+            , case model.cpuDemo of
+                True ->
+                    span [] []
+
                 False ->
                     button
-                        [onClick TriggerOpponentShot]
-                        [text "trigger opponent shot"]
-    --        ,ul []
-    --            <| List.map (\shot -> li [] [text <| toString shot]) model.p2shots
-        ]
+                        [ onClick TriggerOpponentShot ]
+                        [ text "trigger opponent shot" ]
+
+            --        ,ul []
+            --            <| List.map (\shot -> li [] [text <| toString shot]) model.p2shots
+            ]
 
 
-getShotResultStyle : Int -> Model -> List (String,String)
+getShotResultStyle : Int -> Model -> List ( String, String )
 getShotResultStyle idx model =
     case previousShotAtIdx idx model.p2shots of
-        Nothing -> []
+        Nothing ->
+            []
+
         Just shot ->
             case shot.result of
-                Miss -> styles.missStyle
-                Hit -> styles.hitShotStyle
+                Miss ->
+                    styles.missStyle
+
+                Hit ->
+                    styles.hitShotStyle
 
 
 cellGen : Int -> Model -> Html Msg
-cellGen idx model  =
+cellGen idx model =
     let
         cellStyle =
             styles.tdstyle
-            ++ optionalStyle (isOccupied idx model.p1ships) styles.occupiedStyle
-            ++ optionalStyle (isSank idx model.p1ships) styles.sankStyle
-            ++ getShotResultStyle idx model
+                ++ optionalStyle (isOccupied idx model.p1ships) styles.occupiedStyle
+                ++ optionalStyle (isSank idx model.p1ships) styles.sankStyle
+                ++ getShotResultStyle idx model
     in
-        td
-            [style cellStyle]
-            [text <| toString idx]
-
-
+    td
+        [ style cellStyle ]
+        [ text <| toString idx ]

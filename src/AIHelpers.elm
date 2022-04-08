@@ -1,27 +1,29 @@
 module AIHelpers exposing (..)
+
 --    chooseTargetIdx
 --    )
 
+import Helpers exposing (..)
 import Model exposing (..)
 import Mouse exposing (Position)
 import MouseEvents exposing (..)
-import Helpers exposing (..)
 import SetupHelpers exposing (..)
 import ShipHelpers exposing (..)
 
 
+
 {-
---------------------------------
-CPU setup/ship placement helpers
---------------------------------
+   --------------------------------
+   CPU setup/ship placement helpers
+   --------------------------------
+-}
+{-
+   gets a list of valid indexes for placing 'ship'.
+   filters out used indexes and invalid indexes based on ship dimensions
+   and existing board state (other ship coords)
 -}
 
 
-{-
-gets a list of valid indexes for placing 'ship'.
-filters out used indexes and invalid indexes based on ship dimensions
-and existing board state (other ship coords)
--}
 getValidIdxs : List Int -> List Ship -> Ship -> Bool -> List Int
 getValidIdxs spots ships ship rotate =
     let
@@ -31,11 +33,11 @@ getValidIdxs spots ships ship rotate =
         -- any coordinates prior to this step for cpu.
         usedspots =
             ships
-            |> List.map (\ship -> ship.coords)
-            |> List.concat
+                |> List.map (\ship -> ship.coords)
+                |> List.concat
     in
-        -- start with the full list of spots
-        spots
+    -- start with the full list of spots
+    spots
         -- filter used spots
         |> List.filter (\spot -> not <| List.member spot usedspots)
         -- filter spots that would fall outside the board
@@ -44,9 +46,12 @@ getValidIdxs spots ships ship rotate =
         |> List.filter (\spot -> shipFits ship rotate spot usedspots)
 
 
+
 {-
-premature optimization to eliminate invalid coordinates
+   premature optimization to eliminate invalid coordinates
 -}
+
+
 enoughSpace : Int -> Bool -> Int -> Bool
 enoughSpace length rotate idx =
     if rotate then
@@ -54,23 +59,27 @@ enoughSpace length rotate idx =
         -- idx // 10 gets the row number for 'idx'
         -- alternative (idx + (10*length)) < 100
         (10 - (idx // 10)) >= length
+
     else
         -- horizontal placement. ensure all coords are on the same row
-        (10 - (rem idx 10)) >= length
+        (10 - remainderBy 10 idx) >= length
+
 
 
 {-
-get a list of valid board indexes for ship placement
-index into that list via the random number passed
-call tryPlaceShip to attempt to place the ship at the randomized idx
+   get a list of valid board indexes for ship placement
+   index into that list via the random number passed
+   call tryPlaceShip to attempt to place the ship at the randomized idx
 -}
+
+
 cpuTryPlaceShipCore : Int -> Ship -> Model -> Model
 cpuTryPlaceShipCore rand ship model =
     let
         rotate =
             -- 'randomly' set the rotate flag for this placement
             -- TODO: determine right way to randomize another flag
-            ((rem rand 37) > 19)
+            remainderBy 37 rand > 19
 
         valididxs =
             -- get the list of valid potential indexes for this ship
@@ -78,40 +87,43 @@ cpuTryPlaceShipCore rand ship model =
 
         idx =
             -- randomly select one of the valid indexes
-            rem rand (List.length valididxs)
+            remainderBy (List.length valididxs) rand
     in
-        case getNth idx valididxs of
-            Nothing ->
-                Debug.crash "cpuPlaceShip2 getNth returned Nothing"
+    case getNth idx valididxs of
+        Nothing ->
+            Debug.crash "cpuPlaceShip2 getNth returned Nothing"
 
-            Just idx ->
-                let
-                    op =
-                        ShipPlacementOp ship PlayerSide2 idx
+        Just idx ->
+            let
+                op =
+                    ShipPlacementOp ship PlayerSide2 idx
 
-                    newmodel = {model |
-                        placingShip = Just ship
+                newmodel =
+                    { model
+                        | placingShip = Just ship
                         , rotateShip = rotate
-                        }
-                in
-                    tryPlaceShip op newmodel
+                    }
+            in
+            tryPlaceShip op newmodel
+
 
 
 {-
-get the next cpu ship to place
-calculate a valid placement location
-save the ship at that location
+   get the next cpu ship to place
+   calculate a valid placement location
+   save the ship at that location
 -}
+
+
 cpuTryPlaceShip : Int -> Model -> Model
 cpuTryPlaceShip rand model =
     let
         nextship =
             model.p2ships
-            |> List.filter (\ship -> List.length ship.coords == 0)
-            |> List.head
+                |> List.filter (\ship -> List.length ship.coords == 0)
+                |> List.head
     in
     case nextship of
-
         Nothing ->
             model
 
@@ -122,88 +134,100 @@ cpuTryPlaceShip rand model =
 
                 nextstate =
                     case allShipsPlaced newmodel.p2ships of
-                        True -> Playing
-                        False -> CPUSetup
+                        True ->
+                            Playing
+
+                        False ->
+                            CPUSetup
             in
-                {newmodel | gameState = nextstate}
+            { newmodel | gameState = nextstate }
 
 
 
 {-
---------------------------------
-CPU targeting/shooting helpers
---------------------------------
+   --------------------------------
+   CPU targeting/shooting helpers
+   --------------------------------
 -}
-
-
 {-
-use random number for indexing into list of potential target indexes
+   use random number for indexing into list of potential target indexes
 -}
+
+
 chooseTargetIdx : Int -> List Int -> List Shot -> Maybe Int
 chooseTargetIdx rand activeshiphits shots =
     let
         filterfuncs =
-            [findHitNeighbors, findStreaks]
+            [ findHitNeighbors, findStreaks ]
 
         viabletargets =
             getOpenSpots shots
-            |> improveGuess activeshiphits filterfuncs
+                |> improveGuess activeshiphits filterfuncs
 
         randIdx =
-            rem rand (List.length viabletargets)
+            remainderBy (List.length viabletargets) rand
     in
-        getNth randIdx viabletargets
+    getNth randIdx viabletargets
+
 
 
 {-
-use 'filter functions' to reduce the set of potential target indexes
+   use 'filter functions' to reduce the set of potential target indexes
 -}
+
+
 improveGuess : List Int -> List (List Int -> List Int -> List Int) -> List Int -> List Int
 improveGuess activehits filterfuncs openspots =
     case filterfuncs of
-
-        filterFunc::tail ->
+        filterFunc :: tail ->
             let
-                filteredresults = filterFunc activehits openspots
+                filteredresults =
+                    filterFunc activehits openspots
             in
-                case List.length filteredresults > 0 of
-                    True -> improveGuess activehits tail filteredresults
-                    False -> openspots
+            case List.length filteredresults > 0 of
+                True ->
+                    improveGuess activehits tail filteredresults
+
+                False ->
+                    openspots
 
         [] ->
             openspots
 
 
+
 {-
-find potential target indexes which are neighbors with existing
-hits on unsunken ships
+   find potential target indexes which are neighbors with existing
+   hits on unsunken ships
 -}
+
+
 findHitNeighbors : List Int -> List Int -> List Int
 findHitNeighbors activehits openspots =
     List.filter
         (\idx ->
             List.member (idx - 10) activehits
-            || List.member (idx + 10) activehits
-            || ((rem idx 10 > 0) && (List.member (idx - 1) activehits ))
-            || ((rem idx 10 < 9) && (List.member (idx + 1) activehits ))
+                || List.member (idx + 10) activehits
+                || ((remainderBy 10 idx > 0) && List.member (idx - 1) activehits)
+                || ((remainderBy 10 idx < 9) && List.member (idx + 1) activehits)
         )
         openspots
 
 
+
 {-
-find potential target indexes which are adjacent to existing
-hit streaks on unsunken ships of at least length 2
+   find potential target indexes which are adjacent to existing
+   hit streaks on unsunken ships of at least length 2
 -}
+
+
 findStreaks : List Int -> List Int -> List Int
 findStreaks activehits openspots =
     List.filter
         (\idx ->
-            (List.member (idx+1) activehits && List.member (idx+2) activehits)
-            || (List.member (idx-1) activehits && List.member (idx-2) activehits)
-            || (List.member (idx-10) activehits && List.member (idx-20) activehits)
-            || (List.member (idx+10) activehits && List.member (idx+20) activehits
-            )
+            (List.member (idx + 1) activehits && List.member (idx + 2) activehits)
+                || (List.member (idx - 1) activehits && List.member (idx - 2) activehits)
+                || (List.member (idx - 10) activehits && List.member (idx - 20) activehits)
+                || (List.member (idx + 10) activehits && List.member (idx + 20) activehits)
         )
         openspots
-
-
