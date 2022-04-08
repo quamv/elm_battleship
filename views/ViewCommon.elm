@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Decode
 import Model exposing (..)
+import Helpers
 -- import Mouse exposing (Position)
 
 
@@ -50,7 +51,7 @@ type alias CellGenerator =
 tableGen : CellGenerator -> Model -> List ( String, String ) -> Html Msg
 tableGen cellGen model tableStyle =
     table
-        [ style tableStyle ]
+        (Helpers.listOfStringTuplesToStyle tableStyle )
     <|
         List.map (\n -> rowGen cellGen n model) (List.range 0 9)
 

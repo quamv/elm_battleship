@@ -7,17 +7,17 @@ import Json.Decode as Decode
 import Model exposing (..)
 import ViewCommon exposing (..)
 import ViewStyles exposing (..)
+import Helpers
 
 
 viewstyles =
-    [ ( "transform", "rotateX(-14deg)" )
-    ]
+    [ style "transform" "rotateX(-14deg)" ]
 
 
 myshotsView : Model -> Html Msg
 myshotsView model =
     div
-        [ style viewstyles ]
+        viewstyles
         [ tableGen cellGen model styles.myshotsTableStyle ]
 
 
@@ -37,10 +37,10 @@ cellGen idx model =
             -- there was a previous shot on this cell. format based on result
             case shotresult of
                 Hit ->
-                    td [ style <| styles.tdstyle ++ styles.hitStyle ] [ text "hit" ]
+                    td ( Helpers.listOfStringTuplesToStyle <| styles.tdstyle ++ styles.hitStyle ) [ text "hit" ]
 
                 Miss ->
-                    td [ style <| styles.tdstyle ++ styles.missStyle ] [ text "miss" ]
+                    td ( Helpers.listOfStringTuplesToStyle <| styles.tdstyle ++ styles.missStyle ) [ text "miss" ]
 
         Nothing ->
             let
@@ -54,8 +54,8 @@ cellGen idx model =
                             []
             in
             td
-                ([ style styles.tdstyle ] ++ attrs)
-                [ text <| toString idx ]
+                ( Helpers.listOfStringTuplesToStyle styles.tdstyle ++ attrs)
+                [ text <| String.fromInt idx ]
 
 
 onClickShip : msg -> Attribute msg

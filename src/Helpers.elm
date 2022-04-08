@@ -1,6 +1,8 @@
 module Helpers exposing (..)
 
 import Model exposing (..)
+import Html exposing (Attribute)
+import Html.Attributes exposing (style)
 -- import Mouse exposing (Position)
 -- import MouseEvents exposing (..)
 
@@ -66,7 +68,7 @@ fatalError model str =
     let
         newdiags =
             { msg = str
-            , clickPos = MouseEvents.Position 1 1
+            , clickPos = Position 1 1
             }
     in
     { model
@@ -89,3 +91,35 @@ getNth idx values =
         values
             |> List.drop idx
             |> List.head
+
+
+listOfStringTuplesToStyle : List (String, String) -> List (Attribute Msg)
+listOfStringTuplesToStyle someStringTuples =
+    List.map stringTupleToStyle someStringTuples
+
+stringTupleToStyle : (String, String) -> Attribute Msg
+stringTupleToStyle aStringTuple =
+    style (Tuple.first aStringTuple) (Tuple.second aStringTuple)
+
+playerSideToString : PlayerSide -> String
+playerSideToString aPlayerSide =
+    case aPlayerSide of
+        PlayerSide1 -> "Player1"
+        PlayerSide2 -> "Player2"
+
+shipTypeToString : ShipType -> String
+shipTypeToString aShipType =
+    case aShipType of
+        Battleship -> "Battleship"
+        Destroyer -> "Destroyer"
+
+listOfIntsToString : List Int -> String
+listOfIntsToString aListOfInts =
+    "[" ++ (listOfIntsToStringCore aListOfInts) ++ "]"
+
+listOfIntsToStringCore : List Int -> String
+listOfIntsToStringCore aListOfInts =
+    case aListOfInts of
+        (x :: xs) -> String.fromInt x ++ listOfIntsToStringCore xs
+        [] -> ""
+    

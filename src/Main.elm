@@ -21,12 +21,15 @@ import Random exposing (..)
 import Seeds exposing (..)
 import SetupHelpers exposing (..)
 import ShipHelpers exposing (..)
-import Time exposing (Time, millisecond)
+--import Time exposing (Time, millisecond)
+import Time exposing (..)
 import View exposing (..)
+import Browser
 
 
+main : Program () Model Msg
 main =
-    Html.program
+    Browser.element
         { init = init
         , view = view
         , update = update
@@ -45,32 +48,30 @@ subscriptions model =
             Sub.none
 
         CPUSetup ->
-            Sub.batch [ Time.every (1000 * millisecond) AutoTriggerCpuPlaceShip ]
+            Sub.batch [ Time.every 1000 AutoTriggerCpuPlaceShip ]
 
         Playing ->
-            case model.cpuDemo of
-                True ->
-                    Sub.batch [ Time.every (200 * millisecond) AutoTriggerCpuShot ]
+            if model.cpuDemo then
+                Sub.batch [ Time.every 200 AutoTriggerCpuShot ]
+            else
+                case model.playerTurn of
+                    PlayerSide2 ->
+                        Sub.batch [ Time.every 200 AutoTriggerCpuShot ]
 
-                False ->
-                    case model.playerTurn of
-                        PlayerSide2 ->
-                            Sub.batch [ Time.every (200 * millisecond) AutoTriggerCpuShot ]
-
-                        PlayerSide1 ->
-                            Sub.none
+                    PlayerSide1 ->
+                        Sub.none
 
 
-init : ( Model, Cmd Msg )
-init =
+init : () -> ( Model, Cmd Msg )
+init _ =
     ( { p1ships = defaultShipList
       , p2ships = defaultShipList --defaultShipList3
       , p1shots = []
       , p2shots = []
-      , diags = { msg = "", clickPos = MouseEvents.Position 0 0 }
+      , diags = { msg = "", clickPos = Position 0 0 }
       , placingShip = Nothing
       , rotateShip = False
-      , position = MouseEvents.Position 1 1
+      , position = Position 1 1
       , drag = Nothing
       , currentView = MyShips
       , gameState = UserSetup

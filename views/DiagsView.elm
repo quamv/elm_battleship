@@ -14,6 +14,9 @@ import MyShotsView exposing (myshotsView)
 import UserSetupView exposing (userSetupView)
 import ViewCommon exposing (..)
 import ViewStyles exposing (..)
+import Helpers exposing (playerSideToString)
+import Helpers exposing (shipTypeToString)
+import Helpers exposing (listOfIntsToString)
 
 
 
@@ -35,15 +38,15 @@ shipsTable side ships =
             [ "type", "coords" ]
     in
     div []
-        [ div [] [ text <| toString side ]
+        [ div [] [ text <| playerSideToString side ]
         , table []
             [ thead [] <| List.map (\s -> th [] [ text s ]) colnames
             , tbody [] <|
                 List.map
                     (\ship ->
                         tr []
-                            [ td [] [ text <| toString ship.shiptype ]
-                            , td [] [ text <| toString ship.coords ]
+                            [ td [] [ text <| shipTypeToString ship.shiptype ]
+                            , td [] [ text <| listOfIntsToString ship.coords ]
                             ]
                     )
                     ships

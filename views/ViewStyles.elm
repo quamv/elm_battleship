@@ -76,13 +76,11 @@ styles =
 
 
 optionalStyle : Bool -> List ( String, String ) -> List ( String, String )
-optionalStyle bool styles =
-    case bool of
-        True ->
-            styles
-
-        False ->
-            []
+optionalStyle bool someStyles =
+    if bool then 
+        someStyles 
+    else 
+        []
 
 
 shotResultToStyle : ShotResult -> List ( String, String )

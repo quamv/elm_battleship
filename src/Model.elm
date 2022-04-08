@@ -62,6 +62,10 @@ type GamePlayView
     | SideBySide
     | Stacked
 
+type alias Position =
+    { x : Int
+    , y : Int
+    }
 
 type alias Model =
     { p1ships : List Ship

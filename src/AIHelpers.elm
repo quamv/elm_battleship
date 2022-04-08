@@ -33,7 +33,7 @@ getValidIdxs spots ships ship rotate =
         -- any coordinates prior to this step for cpu.
         usedspots =
             ships
-                |> List.map (\ship -> ship.coords)
+                |> List.map (\eachShip -> eachShip.coords)
                 |> List.concat
     in
     -- start with the full list of spots
@@ -93,10 +93,10 @@ cpuTryPlaceShipCore rand ship model =
         Nothing ->
             Debug.crash "cpuPlaceShip2 getNth returned Nothing"
 
-        Just idx ->
+        Just aValue ->
             let
                 op =
-                    ShipPlacementOp ship PlayerSide2 idx
+                    ShipPlacementOp ship PlayerSide2 aValue
 
                 newmodel =
                     { model
@@ -133,12 +133,10 @@ cpuTryPlaceShip rand model =
                     cpuTryPlaceShipCore rand ship model
 
                 nextstate =
-                    case allShipsPlaced newmodel.p2ships of
-                        True ->
-                            Playing
-
-                        False ->
-                            CPUSetup
+                    if allShipsPlaced newmodel.p2ships then
+                        Playing
+                    else
+                        CPUSetup
             in
             { newmodel | gameState = nextstate }
 
@@ -184,12 +182,10 @@ improveGuess activehits filterfuncs openspots =
                 filteredresults =
                     filterFunc activehits openspots
             in
-            case List.length filteredresults > 0 of
-                True ->
-                    improveGuess activehits tail filteredresults
-
-                False ->
-                    openspots
+            if List.length filteredresults > 0 then
+                improveGuess activehits tail filteredresults
+            else
+                openspots
 
         [] ->
             openspots

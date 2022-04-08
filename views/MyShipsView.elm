@@ -7,18 +7,19 @@ import Json.Decode as Decode
 import Model exposing (..)
 import ViewCommon exposing (..)
 import ViewStyles exposing (..)
+import Helpers
 
 
 myshipsView : Model -> Html Msg
 myshipsView model =
     div
-        [ style styles.containerStyle ]
+        (Helpers.listOfStringTuplesToStyle styles.containerStyle)
         [ tableGen cellGen model styles.myshipsTableStyle
 
         --,manualOpponentView model
         ]
 
-
+manualOpponentView : Model -> Html Msg
 manualOpponentView model =
     if model.gameState == GameOver then
         div [] []
@@ -28,12 +29,10 @@ manualOpponentView model =
             [ button
                 [ onClick ToggleCpuDemo ]
                 [ text "toggle cpu demo" ]
-            , case model.cpuDemo of
-                True ->
-                    span [] []
-
-                False ->
-                    button
+            , if model.cpuDemo then
+                span [] []
+              else
+                  button
                         [ onClick TriggerOpponentShot ]
                         [ text "trigger opponent shot" ]
 
@@ -67,5 +66,5 @@ cellGen idx model =
                 ++ getShotResultStyle idx model
     in
     td
-        [ style cellStyle ]
-        [ text <| toString idx ]
+        (Helpers.listOfStringTuplesToStyle cellStyle)
+        [ text <| String.fromInt idx ]

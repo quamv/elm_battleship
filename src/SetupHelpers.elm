@@ -40,20 +40,17 @@ getCoordsIfValidPlacement : Ship -> Int -> Bool -> List Int -> Maybe (List Int)
 getCoordsIfValidPlacement ship idx rotate usedspots =
     let
         mbcoords =
-            case rotate of
-                True ->
-                    mbGenVerticalCoords idx ship.length
-
-                False ->
-                    mbGenHorizCoords idx ship.length
+            if rotate then
+                mbGenVerticalCoords idx ship.length
+            else
+                mbGenHorizCoords idx ship.length
     in
     case mbcoords of
         Just coords ->
             -- coords are at least on the board. check if occupied...
-            if List.any (\idx -> List.member idx usedspots) coords then
+            if List.any (\_ -> List.member idx usedspots) coords then
                 -- occupied, return Nothing to indicate failure
                 Nothing
-
             else
                 -- not occupied, return these coordinates
                 Just coords
@@ -191,13 +188,10 @@ mbGenVerticalCoords idx length =
             List.range 0 (length - 1)
                 |> List.map (\i -> idx + (i * 10))
     in
-    case List.all (\s -> s >= 0 && s < 100) coords of
-        True ->
-            Just coords
-
-        False ->
-            Nothing
-
+    if List.all (\s -> s >= 0 && s < 100) coords then
+        Just coords
+    else
+        Nothing
 
 
 {-
@@ -216,13 +210,10 @@ mbGenHorizCoords idx length =
 
         -- boardWidth
     in
-    case List.all (\i -> i // 10 == row) coords of
-        True ->
-            Just coords
-
-        False ->
-            Nothing
-
+    if List.all (\i -> i // 10 == row) coords then
+        Just coords
+    else
+        Nothing
 
 
 {-

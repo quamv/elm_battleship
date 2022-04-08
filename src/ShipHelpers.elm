@@ -169,12 +169,10 @@ tryShotAtIdx idx model =
                     List.any (\ship -> not ship.sank) newmodel.p1ships
                         && List.any (\ship -> not ship.sank) newmodel.p2ships
             in
-            case keepplaying of
-                True ->
-                    model.gameState
-
-                False ->
-                    GameOver
+            if keepplaying then
+                model.gameState
+            else
+                GameOver
     in
     { newmodel
         | gameState = nextgamestate
@@ -201,14 +199,12 @@ tryShot model idx =
                 PlayerSide2 ->
                     model.p2shots
     in
-    case List.any (\shot -> shot.idx == idx) shots of
-        True ->
-            -- duplicate shot attempt. ignore
-            model
-
-        False ->
-            -- not duplicate. try shot
-            tryShotAtIdx idx model
+    if List.any (\shot -> shot.idx == idx) shots then
+        -- duplicate shot attempt. ignore
+        model
+    else
+        -- not duplicate. try shot
+        tryShotAtIdx idx model
 
 
 
@@ -260,12 +256,10 @@ nextGameState model =
             List.any (\ship -> not ship.sank) model.p1ships
                 && List.any (\ship -> not ship.sank) model.p2ships
     in
-    case keepplaying of
-        True ->
-            model.gameState
-
-        False ->
-            GameOver
+    if keepplaying then
+        model.gameState
+    else
+        GameOver
 
 
 allShipsPlaced : List Ship -> Bool

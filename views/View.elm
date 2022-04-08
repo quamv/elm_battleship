@@ -15,12 +15,13 @@ import MyShotsView exposing (myshotsView)
 import UserSetupView exposing (userSetupView)
 import ViewCommon exposing (..)
 import ViewStyles exposing (..)
+import Helpers
 
 
 view : Model -> Html Msg
 view model =
     div
-        [ style styles.masterContainerStyle ]
+        (Helpers.listOfStringTuplesToStyle styles.masterContainerStyle)
         [ div
             []
             --[style [("margin","0 auto"),("width","500px")]]
@@ -61,12 +62,14 @@ numLiveShips ships =
         |> List.length
 
 
+cellStyle : List (String, String)
 cellStyle =
     [ ( "padding", "0px 10px 0px 10px" )
     , ( "border", "1px solid black" )
     ]
 
 
+tableStyle : List (String, String)
 tableStyle =
     [ ( "border", "1px solid black" )
     ]
@@ -79,15 +82,15 @@ shipsTable side ships =
             [ "shiptype", "coords" ]
     in
     div []
-        [ div [] [ text <| toString side ++ " Ships" ]
-        , table [ style tableStyle ]
+        [ div [] [ text <| Helpers.playerSideToString side ++ " Ships" ]
+        , table (Helpers.listOfStringTuplesToStyle tableStyle)
             [ thead [] <| List.map (\s -> th [] [ text s ]) colnames
             , tbody [] <|
                 List.map
                     (\ship ->
                         tr []
-                            [ td [ style cellStyle ] [ text <| toString ship.shiptype ]
-                            , td [ style cellStyle ] [ text <| toString ship.coords ]
+                            [ td ( Helpers.listOfStringTuplesToStyle cellStyle ) [ text <| Helpers.shipTypeToString ship.shiptype ]
+                            , td ( Helpers.listOfStringTuplesToStyle cellStyle) [ text <| Helpers.listOfIntsToString ship.coords ]
                             ]
                     )
                     ships
@@ -117,9 +120,9 @@ gameOverView model =
             , ( "width", "600px" )
             ]
     in
-    div [ style divstyle ]
+    div (Helpers.listOfStringTuplesToStyle divstyle )
         [ div [] [ text "Game Over!" ]
-        , div [] [ text <| "Winner: " ++ toString winner ]
+        , div [] [ text <| "Winner: " ++ Helpers.playerSideToString winner ]
         , shipsTable PlayerSide1 model.p1ships
         , shipsTable PlayerSide2 model.p2ships
         ]
@@ -127,12 +130,10 @@ gameOverView model =
 
 getSbsStyle : PlayerSide -> PlayerSide -> List ( String, String )
 getSbsStyle activeside side =
-    case activeside == side of
-        True ->
-            styles.sidebysideViewStyle ++ styles.activeView
-
-        False ->
-            styles.sidebysideViewStyle ++ styles.inactiveView
+    if activeside == side then
+        styles.sidebysideViewStyle ++ styles.activeView
+    else
+        styles.sidebysideViewStyle ++ styles.inactiveView
 
 
 sidebysideView : Model -> Html Msg
@@ -140,11 +141,11 @@ sidebysideView model =
     div []
         [ ul [ style "text-align" "center" ]
             [ li
-                [ style <| getSbsStyle model.playerTurn PlayerSide1 ]
+                (Helpers.listOfStringTuplesToStyle <| getSbsStyle model.playerTurn PlayerSide1 )
                 --[style <| styles.sidebysideViewStyle ++ styles.activeView]
                 [ myshotsdiv model ]
             , li
-                [ style <| getSbsStyle model.playerTurn PlayerSide2 ]
+                (Helpers.listOfStringTuplesToStyle <| getSbsStyle model.playerTurn PlayerSide2 )
                 --[style <| styles.sidebysideViewStyle ++ styles.activeView]
                 --[myshipsView model]
                 [ myshipsdiv model ]
@@ -207,7 +208,7 @@ viewSelector model =
 
 dualView : Model -> Html Msg
 dualView model =
-    div [ style styles.dualViewStyle ]
+    div (Helpers.listOfStringTuplesToStyle styles.dualViewStyle )
         [ myshotsView model
         , myshipsView model
         ]
