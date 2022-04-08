@@ -88,7 +88,7 @@ update msg model =
         {- setup
            TODO: organize messages into classes/submessages
         -}
-        AutoTriggerCpuPlaceShip diff ->
+        AutoTriggerCpuPlaceShip _ ->
             update TriggerCpuPlaceShip model
 
         TriggerCpuPlaceShip ->
@@ -134,7 +134,7 @@ update msg model =
                     update (PlaceShipAtIdx op) newmodel
 
         {- shot-related messages -}
-        AutoTriggerCpuShot diff ->
+        AutoTriggerCpuShot _ ->
             -- timer tick to automate cpu shots
             -- just re-use existing message route
             update TriggerOpponentShot model

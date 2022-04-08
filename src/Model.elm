@@ -101,8 +101,8 @@ type Msg
     | TriggerOpponentShot
     | TakeSmahtahShawt Int
     | ToggleCpuDemo
-    | AutoTriggerCpuShot Time
-    | AutoTriggerCpuPlaceShip Time
+    | AutoTriggerCpuShot Posix
+    | AutoTriggerCpuPlaceShip Posix
     | TriggerCpuPlaceShip
     | CpuPlaceShip Int
 
